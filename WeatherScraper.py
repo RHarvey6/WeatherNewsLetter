@@ -10,12 +10,15 @@ from email.mime.text import MIMEText
 
 import datetime
 
-now = datetime.datetime.now()
+import csv
 
-content = ''
-
-#url = "https://forecast.weather.gov/MapClick.php?CityName=White+Bear+Lake&state=MN&site=MPX&textField1=45.0677&textField2=-93.0127&e=0"
-url = "https://forecast.weather.gov/MapClick.php?CityName=Owatonna&state=MN&site=MPX&textField1=44.0852&textField2=-93.2243&e=0"
+def get_lat_long(city, state):
+    with open("./uscities.csv", 'r') as file:
+        csvreader = csv.reader(file)
+        for row in csvreader:
+            if(row[0] == city):
+                if(row[1] == state):
+                    return (row[2],row[3])
 
 def extract_weather(url):
     print('Extracting Weather')
@@ -60,13 +63,12 @@ def extract_weather(url):
 def sendEmail(content):
     print('composing email...')
     #Email details
-    f = open('config.properties.txt', 'r')
-    SERVER = f.readline().strip()
-    PORT = int(f.readline().strip())
-    FROM = f.readline().strip()
-    TO = f.readline().strip()
-    PASS = f.readline().strip()
-    f.close()
+    with open('config.properties.txt', 'r') as f:
+        SERVER = f.readline().strip()
+        PORT = int(f.readline().strip())
+        FROM = f.readline().strip()
+        TO = f.readline().strip()
+        PASS = f.readline().strip()
 
     msg = MIMEMultipart()
 
@@ -95,14 +97,19 @@ def sendEmail(content):
 
     content = ''
 
+now = datetime.datetime.now()
 
+content = ''
+
+city = 'Anchorage'
+state = 'Alaska'
+
+(lat, long) = get_lat_long(city, state)
+
+url = 'https://forecast.weather.gov/MapClick.php?textField1=' + lat + '&textField2=' + long
 
 cnt = extract_weather(url)
 
-city = re.search('CityName=[^&]+', url)
-city = city.string[city.start()+9:city.end()].replace('+', ' ') #If the city name is multiple words, the url will have +, so this replaces that
-state = re.search('state=[^&]+', url)
-state = state.string[state.start()+6:state.end()]
 
 
 content += cnt
