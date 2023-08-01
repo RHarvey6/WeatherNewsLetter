@@ -1,0 +1,22 @@
+body {
+    font-family: Georgia, serif;
+    font-size: 40px;
+}
+nav {
+    font-size: 50px;
+    display: flex;
+    justify-content: space-around;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    background-color: #72afff;
+    margin-bottom: 25px;
+    margin-top: 10px;
+    border: thin solid #323232;
+    box-sizing: border-box;
+}
+img {
+    height: 32px;
+    overflow-clip-margin: content-box;
+    overflow: clip;
+}

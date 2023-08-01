@@ -1,2 +1,0 @@
-# WeatherNewsLetter
-Automatic weather email
