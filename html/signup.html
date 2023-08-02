@@ -3,19 +3,13 @@
   <head>
     <link rel="stylesheet" type="text/css" href="./styles.css" />
     <title>My GitHub Pages Site</title>
-    <script>
-function createSelectOption() {    
-    var select_option = '<select>';
-    for(i = 1; i <= 100; i++) { 
-       select_option += '<option value=' + i + '>' + i + '</option>';
-    }
-    select_option += '</select>';
-    document.getElementById('mySelect').innerHTML = select_option;
-}
-    </script>
+    <script src="https://d3js.org/d3.v5.min.js"></script>
+    <script type="text/javascript" src="./js/app.js"></script>
+
   </head>
-  <body onload = "createSelectOption()">
+  <body>
     <div class = "container">
+
         <nav>
             <a  id = "nav-image">
               <img id = "nav-image" src = "./img/lightning.png">
@@ -27,7 +21,20 @@ function createSelectOption() {
               <img id = "nav-image" src = "./img/lightning.png">
             </a>
         </nav>
-        <select id = 'mySelect'></select>
+
+        <div>
+          <select class = 'select' id = 'selectState' onchange = "printTest()">
+            <option value = "minnesota"> Minnesota</option>
+            <option value = "kansas"> Kansas</option>
+          </select>
+          <select id = 'selectCity'></select>
+        </div>
+
+
+    <input type="file" name="file" id="file">
+    <div id='output'>
+  ...
+    </div>
     </div>
   </body>
 </html>
