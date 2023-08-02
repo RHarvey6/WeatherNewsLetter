@@ -3,22 +3,31 @@
   <head>
     <link rel="stylesheet" type="text/css" href="./styles.css" />
     <title>My GitHub Pages Site</title>
+    <script>
+function createSelectOption() {    
+    var select_option = '<select>';
+    for(i = 1; i <= 100; i++) { 
+       select_option += '<option value=' + i + '>' + i + '</option>';
+    }
+    select_option += '</select>';
+    document.getElementById('mySelect').innerHTML = select_option;
+}
+    </script>
   </head>
-  <body>
+  <body onload = "createSelectOption()">
     <div class = "container">
         <nav>
             <a  id = "nav-image">
               <img id = "nav-image" src = "./img/lightning.png">
             </a>
-            <a style = "text-decoration: none; color: white"class = "navbar-home" href="./index.html">Weather Email</a>
-            <a style = "text-decoration: none"class = "nav-link" href="signup.html">Signup</a>
-            <a style = "text-decoration: none"class = "nav-link" href = "/about">About</a>
+            <a style = "text-decoration: none; color: white"class = "navbar-home" href="../index.html">Weather Email</a>
+            <a style = "text-decoration: none"class = "nav-link" href="./signup.html">Signup</a>
+            <a style = "text-decoration: none"class = "nav-link" href = "./about.html">About</a>
             <a id = "nav-image">
               <img id = "nav-image" src = "./img/lightning.png">
             </a>
         </nav>
-    <h1 style = "color: aliceblue;">Hello world!</h1>
-    <p>Welcome to my GitHub Pages site!</p>
+        <select id = 'mySelect'></select>
     </div>
   </body>
 </html>

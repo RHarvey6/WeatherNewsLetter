@@ -15,6 +15,13 @@ nav {
     border: thin solid #323232;
     box-sizing: border-box;
 }
+
+a{
+    text-decoration: none;
+}
+.nav-link {
+    color: #0003b4;
+}
 img {
     height: 32px;
     overflow-clip-margin: content-box;
