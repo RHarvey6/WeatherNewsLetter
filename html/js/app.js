@@ -13,12 +13,12 @@ d3.csv("uscities.csv").then(function (data) {
   console.log(cityStates)
 
   function runEnter() {
-    alert('test')
 
     d3.select("output").html("") //goes to the output at end of file, will change
     d3.event.preventDefault(); //stops page refreshing
     var inputElement = d3.select("#selectState").property("value"); //Input from the state select box
-    var filteredCities = cityStates.filter(cityStates => cityStates.state.include(inputElement))
+    console.log(typeof(inputElement))
+    var filteredCities = cityStates.filter(cityStates => cityStates.State.includes(inputElement))
     console.log(filteredCities)
     /*
     d3.select("output").html("")
