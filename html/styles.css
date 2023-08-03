@@ -15,6 +15,37 @@ nav {
     border: thin solid #323232;
     box-sizing: border-box;
 }
+.signupIntro{
+    font-size: 20px;
+}
+
+form{
+    position: relative;
+    width: 400px;
+    height:125px;
+    padding: 40px;
+    background: rgba(0,0,0,.3);
+    border-radius: 10px;
+}
+label{
+    font-size: 20px;
+}
+
+.emailBox{
+    position: absolute;
+    top: 0%;
+}
+
+.stateSelect{
+    position:absolute;
+    top:33%;
+}
+
+.citySelect{
+    position:absolute;
+    top:66%;
+}
+
 
 a{
     text-decoration: none;

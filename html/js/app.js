@@ -1,11 +1,30 @@
 d3.csv("uscities.csv").then(function (data) {
   var cityStates = data;
 
-  var button = d3.select("#selectState"); //The select state box
-  button.on("click",setStates) //Whenever you click on the states box
-  button.on("change", runEnter); //Whenver you change the states box
+  var emailBox = d3.select("#Email");
+  emailBox.on("change", runEmailCheck)
+
+  var stateButton = d3.select("#selectState"); //The select state box
+  stateButton.on("click",setStates) //Whenever you click on the states box
+  stateButton.on("change", runEnter); //Whenver you change the states box
 
   hasRan = false //Only run once to prevent lag
+
+  function runEmailCheck () {
+    emailText = d3.select("#Email").property("value")
+    if(ValidateEmail(emailText)){
+      
+    }
+    
+  }
+
+  function ValidateEmail(inputText) { //Returns true or false whether a valid email
+  var mailformat = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
+  console.log(mailformat.test(inputText))
+  if(mailformat.test(inputText)){return true;}
+    else {return false;}
+  }
+
   function setStates() {
     if(hasRan == false){
       filteredCities = data.sort(function (a,b) {return d3.ascending(a.State, b.State);}); //Sort states alphabetically

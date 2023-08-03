@@ -14,21 +14,38 @@
             <a  id = "nav-image">
               <img id = "nav-image" src = "./img/lightning.png">
             </a>
-            <a style = "text-decoration: none; color: white"class = "navbar-home" href="../index.html">Weather Email</a>
+            <a style = "text-decoration: none; color: white"class = "navbar-home" href="../index.html">Weather Newsletter</a>
             <a style = "text-decoration: none"class = "nav-link" href="./signup.html">Signup</a>
             <a style = "text-decoration: none"class = "nav-link" href = "./about.html">About</a>
             <a id = "nav-image">
               <img id = "nav-image" src = "./img/lightning.png">
             </a>
         </nav>
+        <p class = "signupIntro">
+          To signup for the weather newsletter just enter your email, state, and city.
+        </p>
+        <form>
 
-        <div>
-          <select id="selectState" name="state">
-            <option value="---">---</option>
-          </select>
-          <select id = 'selectCity'>
-          </select>
-        </div>
+          <div class = "emailBox">
+            <label for="Email">Email:</label>
+            <input type="text" id="Email" name="Email" placeholder="email@email.com">
+          </div>
+
+          <div class = "stateSelect">
+            <label for ="selectState">State:</label>
+            <select class = "formElement" id="selectState" name="state">
+              <option value="---">---</option>
+            </select>
+          </div>
+
+          <div class = "citySelect">
+            <label for ="selectCity">City:</label>
+            <select id = 'selectCity'>
+            </select>
+          </div>
+
+
+        </form>
 
     </div>
   </body>
