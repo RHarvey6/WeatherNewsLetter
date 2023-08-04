@@ -4,7 +4,8 @@
     <link rel="stylesheet" type="text/css" href="./styles.css" />
     <title>My GitHub Pages Site</title>
     <script src="https://d3js.org/d3.v5.min.js"></script>
-    <script type="text/javascript" src="./js/app.js"></script>
+    <script type="text/javascript" src="./js/app.js"></script> 
+</script>
 
   </head>
   <body>
@@ -15,7 +16,7 @@
               <img id = "nav-image" src = "./img/lightning.png">
             </a>
             <a style = "text-decoration: none; color: white"class = "navbar-home" href="../index.html">Weather Newsletter</a>
-            <a style = "text-decoration: none"class = "nav-link" href="./signup.html">Signup</a>
+            <a style = "text-decoration: none"class = "nav-link" href="./signup.html">Sign up</a>
             <a style = "text-decoration: none"class = "nav-link" href = "./about.html">About</a>
             <a id = "nav-image">
               <img id = "nav-image" src = "./img/lightning.png">
@@ -24,11 +25,12 @@
         <p class = "signupIntro">
           To signup for the weather newsletter just enter your email, state, and city.
         </p>
-        <form>
+        <form onsubmit = "formSubmit(event)">
 
           <div class = "emailBox">
             <label for="Email">Email:</label>
             <input type="text" id="Email" name="Email" placeholder="email@email.com">
+            <p id = "emailValid"></p>
           </div>
 
           <div class = "stateSelect">
@@ -42,6 +44,10 @@
             <label for ="selectCity">City:</label>
             <select id = 'selectCity'>
             </select>
+          </div>
+
+          <div class = "submitButton">
+            <button id="submitButton">Submit</button>
           </div>
 
 
