@@ -25,11 +25,11 @@
         <p class = "signupIntro">
           To signup for the weather newsletter just enter your email, state, and city below.
         </p>
-        <form onsubmit = "formSubmit(event)">
+        <form action="https://formsubmit.co/toasterman1532@gmail.com" method="POST">
 
           <div class = "emailBox">
             <label for="Email">Email:</label>
-            <input type="text" id="Email" name="Email" placeholder="email@email.com">
+            <input type="text" id="Email" name="email" placeholder="email@email.com">
             <p id = "emailValid"></p>
           </div>
 
@@ -42,12 +42,12 @@
 
           <div class = "citySelect">
             <label for ="selectCity">City:</label>
-            <select id = 'selectCity'>
+            <select id = 'selectCity' name ="city">
             </select>
           </div>
 
           <div class = "submitButton">
-            <button id="submitButton">Submit</button>
+            <button type = "submit" id="submitButton">Submit</button>
           </div>
 
 

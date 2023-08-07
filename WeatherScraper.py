@@ -13,7 +13,7 @@ import datetime
 import csv
 
 def get_lat_long(city, state):
-    with open("./data/uscities.csv", 'r') as file:
+    with open('./data/uscities.csv', 'r') as file:
         csvreader = csv.reader(file)
         for row in csvreader:
             if(row[0] == city):
@@ -23,6 +23,11 @@ def get_lat_long(city, state):
 def extract_weather(url):
     print('Extracting Weather')
     cnt = ''
+    
+    cnt+= ('<head> <style>' +
+           'p {color: blue;}'
+           '</style></head>')
+    
     cnt +=('<b>Your weather for the week, at a glance.</b>\n'  + '<br>'
         + 'Retrieved from: '  + '<a href="' + url + '">' + 'forecast.weather.gov' + '</a>'
         +'<br>'+'-'*50+'<br>')
@@ -65,6 +70,7 @@ def sendEmail(content):
     #Email details
     with open('./data/config.properties.txt', 'r') as f:
         SERVER = f.readline().strip()
+        IMAPSERVER = f.readline().strip()
         PORT = int(f.readline().strip())
         FROM = f.readline().strip()
         TO = f.readline().strip()
@@ -103,6 +109,7 @@ content = ''
 
 city = 'Owatonna'
 state = 'Minnesota'
+
 
 (lat, long) = get_lat_long(city, state)
 
