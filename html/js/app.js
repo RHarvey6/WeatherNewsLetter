@@ -2,7 +2,7 @@ function formSubmit(event) {
   event.preventDefault()
 }
 
-d3.csv("uscities.csv").then(function (data) {
+d3.csv("../data/uscities.csv").then(function (data) {
   var cityStates = data;
 
   var emailBox = d3.select("#Email");

@@ -1,3 +1,7 @@
+html {
+    background-color: #2f2f35;
+}
+
 body {
     font-family: Georgia, serif;
     font-size: 50px;
@@ -9,14 +13,17 @@ nav {
     flex-direction: row;
     flex-wrap: wrap;
     align-items: center;
-    background-color: #72afff;
+    background-color: #2a86fd;
     margin-bottom: 25px;
     margin-top: 10px;
     border: thin solid #323232;
     box-sizing: border-box;
 }
 .signupIntro{
+    left: 50%;
+    text-align: center;
     font-size: 20px;
+    color:aliceblue;
 }
 #emailValid{
     font-weight: 1000;
@@ -27,11 +34,13 @@ nav {
 }
 
 form{
+    left: 50%;
+    transform: translateX(-50%);
     position: relative;
     width: 400px;
     height:300px;
     padding: 40px;
-    background: rgba(209, 25, 226, 0.4);
+    background: #2a86fd;
     border-radius: 10px;
 }
 label{
@@ -92,8 +101,18 @@ a{
 .nav-link {
     color: #0003b4;
 }
-img {
+#nav-image {
     height: 32px;
     overflow-clip-margin: content-box;
     overflow: clip;
+}
+#Tstorm{
+}
+h1 {
+    color:rgb(251, 255, 0);
+    font-size:20px;
+}
+.p{
+    color:rgb(243, 243, 255);
+    font-size: 20px;
 }
