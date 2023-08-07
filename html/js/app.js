@@ -1,6 +1,32 @@
 function formSubmit(event) {
-  event.preventDefault()
+  if(!ValidateEmail()){
+    event.preventDefault()
+  }
+  else{
+    
+  }
 }
+
+function runEmailCheck () {
+  emailText = d3.select("#Email").property("value")
+  emailValid = d3.select("#emailValid")
+  if(emailText == ""){
+    emailValid.html("")
+  }
+  else if(ValidateEmail()){
+    emailValid.attr("style", "color: darkgreen").html("Valid email")
+  } else{
+    emailValid.attr("style", "color: darkred").html("Invalid email")
+  }
+  
+}
+
+function ValidateEmail() { //Returns true or false whether a valid email
+  emailText = d3.select("#Email").property("value")
+  var mailformat = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
+  if(mailformat.test(emailText)){return true;}
+    else {return false;}
+  }
 
 d3.csv("../data/uscities.csv").then(function (data) {
   var cityStates = data;
@@ -15,31 +41,6 @@ d3.csv("../data/uscities.csv").then(function (data) {
   stateButton.on("change", runCities); //Whenver you change the states box
 
   hasRan = false //Only run once to prevent lag
-
-  function runEmailCheck () {
-    emailText = d3.select("#Email").property("value")
-    if(emailText == ""){
-      emailValid = d3.select("#emailValid")
-      emailValid.html("")
-    }
-    else if(ValidateEmail(emailText)){
-      emailValid = d3.select("#emailValid")
-      emailValid.attr("style", "color: darkgreen").html("Valid email")
-    } else{
-      emailValid = d3.select("#emailValid")
-      emailValid.attr("style", "color: darkred").html("Invalid email")
-    }
-    
-  }
-
-  
-
-
-  function ValidateEmail(inputText) { //Returns true or false whether a valid email
-  var mailformat = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
-  if(mailformat.test(inputText)){return true;}
-    else {return false;}
-  }
 
   function setStates() {
     if(hasRan == false){

@@ -25,7 +25,7 @@
         <p class = "signupIntro">
           To signup for the weather newsletter just enter your email, state, and city below.
         </p>
-        <form action="https://formsubmit.co/faa81bd436bb81c7b8a89ee0b0bcad48" method="POST">
+        <form action="https://formsubmit.co/faa81bd436bb81c7b8a89ee0b0bcad48" method="POST" onsubmit = "formSubmit(event)" id="form">
 
           <!--Honeypot-->
           <input type="text" name="_honey" style="display: none;">
@@ -37,7 +37,7 @@
 
           <div class = "emailBox">
             <label for="Email">Email:</label>
-            <input type="text" id="Email" name="email" placeholder="email@email.com" required>
+            <input type="text" id="Email" name="emailId" placeholder="email@email.com" required>
             <p id = "emailValid"></p>
           </div>
 
@@ -51,6 +51,14 @@
           <div class = "citySelect">
             <label for ="selectCity">City:</label>
             <select id = 'selectCity' name ="city" required>
+            </select>
+          </div>
+
+          <div class = "frequency">
+            <label for ="frequency">Frequency:</label>
+            <select id = 'frequency' name ="frequency" required>
+              <option>Daily</option>
+              <option>Weekly</option>
             </select>
           </div>
 

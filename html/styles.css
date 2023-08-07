@@ -65,17 +65,21 @@ select{
 
 .stateSelect{
     position:absolute;
-    top:25%;
+    top:20%;
 }
 
 .citySelect{
     position:absolute;
-    top:50%;
+    top:40%;
+}
+.frequency{
+    position:absolute;
+    top:60%;
 }
 .submitButton{
 
     position:absolute;
-    top:75%;
+    top:80%;
     left: 50%;
     transform: translate(-50%, 0%);
 }
