@@ -25,24 +25,32 @@
         <p class = "signupIntro">
           To signup for the weather newsletter just enter your email, state, and city below.
         </p>
-        <form action="https://formsubmit.co/toasterman1532@gmail.com" method="POST">
+        <form action="https://formsubmit.co/faa81bd436bb81c7b8a89ee0b0bcad48" method="POST">
+
+          <!--Honeypot-->
+          <input type="text" name="_honey" style="display: none;">
+
+          <!--Disable Captcha-->
+          <input type="hidden" name="_captcha" value="false">
+
+          <input type="hidden" name="_next" value="https://rharvey6.github.io/WeatherNewsLetter/html/formSuccess.html">
 
           <div class = "emailBox">
             <label for="Email">Email:</label>
-            <input type="text" id="Email" name="email" placeholder="email@email.com">
+            <input type="text" id="Email" name="email" placeholder="email@email.com" required>
             <p id = "emailValid"></p>
           </div>
 
           <div class = "stateSelect">
             <label for ="selectState">State:</label>
-            <select class = "formElement" id="selectState" name="state">
+            <select class = "formElement" id="selectState" name="state" required>
               <option value="---">---</option>
             </select>
           </div>
 
           <div class = "citySelect">
             <label for ="selectCity">City:</label>
-            <select id = 'selectCity' name ="city">
+            <select id = 'selectCity' name ="city" required>
             </select>
           </div>
 
