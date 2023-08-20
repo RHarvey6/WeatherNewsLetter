@@ -1,5 +1,6 @@
 import requests
 import re
+import json
 
 from bs4 import BeautifulSoup
 
@@ -65,10 +66,29 @@ def extract_weather(url):
                 '</div>')
     return(cnt)
 
-def sendEmail(content):
-    print('composing email...')
-    #Email details
+def writeFormJson(api_code): #Writes json file to local machine
+    #form submission api get
+    response = requests.get("https://formsubmit.co/api/get-submissions/" + api_code)
+
+    json_dict = json.loads(response.text)
+    json_str = json.dumps(json_dict, indent=4)
+
+    def writeJson(file): #write the file
+        with open("./data/form_data.json", "w") as outfile:
+            outfile.write(file)
+    writeJson(json_str)
+
+def getFormData(): #Reads local json file, returns 
+    with open('./data/form_data.json', 'r') as openfile: #open written json file
+        # Reading from json file
+        json_object = json.load(openfile)
+    json_data = json_object['submissions']
+    return json_data
+
+def sendEmails(user_info):
+    now = datetime.datetime.now()
     with open('./data/config.properties.txt', 'r') as f:
+
         SERVER = f.readline().strip()
         IMAPSERVER = f.readline().strip()
         PORT = int(f.readline().strip())
@@ -77,13 +97,8 @@ def sendEmail(content):
         PASS = f.readline().strip()
 
     msg = MIMEMultipart()
-
-    msg['Subject'] = 'Weather for the Week [Automated Email]' + ' ' + city + ', ' + state + ', ' + str(now.month) + '-' + str(now.day) + '-' + str(now.year)
     msg['From'] = FROM
-    msg['TO'] = TO
-    #msg['To'] = ",".join(TO)
 
-    msg.attach(MIMEText(content,'html'))
 
     print("Initiating Server")
 
@@ -93,38 +108,61 @@ def sendEmail(content):
     server.ehlo()
     server.starttls()
     server.login(FROM, PASS)
-    server.sendmail(FROM, TO, msg.as_string())
 
-    print('Email Sent...')
+    for user in user_info: #Loops through each user, sending an email to each one
+        city = user['city']
+        state = user['state']
+        TO = user['emailId']
+        content = user['content']
+
+        msg['Subject'] = 'Weather for the Week [Automated Email]' + ' ' + city + ', ' + state + ', ' + str(now.month) + '-' + str(now.day) + '-' + str(now.year)
+        msg['TO'] = TO
+        msg.attach(MIMEText(content,'html'))
+        server.sendmail(FROM, TO, msg.as_string()) #SEND THE EMAIL
+        print('Email Sent...')
 
     server.quit()
 
+def initEmail(): #Creates all content for each email, as well as the user info to send emails out to corresponding user
+    print('composing emails...')
+
+    #Email details
+
+    #TODO Call writeFormJson w/ api_code in config.properties
+
+    user_forms = getFormData()
+    user_info = [] #Will be a list of dicts of each users info, and the content to put into the email
+ 
+    for form in user_forms: #For each form/submission in the json_file
+        form_data = form['form_data']
+        
+        city = form_data['city']
+        state = form_data['state']
+        '''
+        try: TO = form_data['emailId']
+        except KeyError:
+            pass
+        try: frequency = form_data['frequency']
+        except KeyError:
+            pass
+        '''
+    
+        content = ''
+
+        (lat, long) = get_lat_long(city, state)
+        url = 'https://forecast.weather.gov/MapClick.php?textField1=' + lat + '&textField2=' + long
+        cnt = extract_weather(url)
+
+        content += cnt
+        content += ('<br>------<br>')
+        content +=('<br><br>End of Message')
+
+        form_data['content'] = content #Append content to form_data
+        user_info.append(form_data) #Append form_data to the list of all users data
+
+    return user_info
 
 
-    content = ''
-
-now = datetime.datetime.now()
-
-content = ''
-
-city = 'Owatonna'
-state = 'Minnesota'
-
-
-(lat, long) = get_lat_long(city, state)
-
-url = 'https://forecast.weather.gov/MapClick.php?textField1=' + lat + '&textField2=' + long
-
-cnt = extract_weather(url)
-
-
-
-content += cnt
-content += ('<br>------<br>')
-content +=('<br><br>End of Message')
-
-sendEmail(content)
-
-
-
+users = initEmail()
+#sendEmails(users)
 
