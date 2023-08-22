@@ -1,17 +1,12 @@
 import requests
 import re
 import json
-
+import csv
 from bs4 import BeautifulSoup
-
 import smtplib
-
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
-
 import datetime
-
-import csv
 
 def get_lat_long(city, state):
     with open('./data/uscities.csv', 'r') as file:
@@ -66,35 +61,84 @@ def extract_weather(url):
                 '</div>')
     return(cnt)
 
-def writeFormJson(api_code): #Writes json file to local machine
+def writeFormJson(api_code): #Writes json file to local machine from API
     #form submission api get
     response = requests.get("https://formsubmit.co/api/get-submissions/" + api_code)
 
     json_dict = json.loads(response.text)
-    json_str = json.dumps(json_dict, indent=4)
 
-    def writeJson(file): #write the file
-        with open("./data/form_data.json", "w") as outfile:
-            outfile.write(file)
-    writeJson(json_str)
+    json_data = json_dict['submissions']
+    form_list = []
+    form_data_list = []
+    
+    for form in json_data: #DUPLICATE PROTECTION
+        form_data = form['form_data']
+        if(form_data not in form_data_list):
+            form_data_list.append(form_data)
+            form_list.append(form)
+    json_dict['submissions'] = form_list
 
-def getFormData(): #Reads local json file, returns 
+    json_str = json.dumps(json_dict, indent=4) #Convert to string, then write
+    with open("./data/form_data.json", "w") as outfile:
+        outfile.write(json_str)
+
+def updateCsv(): #Adds any new users from the json not currently in the CSV 
     with open('./data/form_data.json', 'r') as openfile: #open written json file
         # Reading from json file
         json_object = json.load(openfile)
     json_data = json_object['submissions']
-    return json_data
+
+    user_info = []
+
+    for form in json_data: #GET ALL POTENTIAL NEW USERS FROM JSON
+        form_data = form['form_data']
+        if(form_data not in user_info): #Duplicate protection from the form submissions
+            user_info.append(form_data)
+
+    reader_data = [] #GET ALL CURRENT USERS IN LOCAL CSV
+    with open('./data/form_data.csv', 'r', newline='') as outfile:
+        reader = csv.reader(outfile)
+        for row in reader:
+            reader_data.append(row) #Copy all users in the CSV to the reader_data to use later
+
+    with open('./data/form_data.csv', 'a', newline='') as outfile: #APPEND ALL NEW USERS TO CSV
+        writer = csv.writer(outfile)
+        dupe = False #DUPLICATE PROTECTION
+        for user in user_info: #For each new user in the jsonForm
+            for row in reader_data: #For each user already in the form_data CSV
+                if(row[0]!=user['emailId'] or row[1]!=user['state'] or row[2]!=user['city']): #If not a dupe
+                    continue
+                else:
+                    dupe = True
+            if(dupe==False):
+                writer.writerow(user.values())
+            dupe=False
+
+def getCsvData(): #Reads local csv form_data, returns all user info
+    user_data = []
+    with open('./data/form_data.csv', 'r', newline='') as outfile:
+        reader = csv.reader(outfile)
+        for row in reader:
+            current_user = {}
+            current_user['emailId'] = row[0]
+            current_user['state'] = row[1]
+            current_user['city'] = row[2]
+            current_user['frequency'] = row[3]
+            user_data.append(current_user)
+
+    return user_data
 
 def sendEmails(user_info):
     now = datetime.datetime.now()
     with open('./data/config.properties.txt', 'r') as f:
+        lines = f.readlines()
 
-        SERVER = f.readline().strip()
-        IMAPSERVER = f.readline().strip()
-        PORT = int(f.readline().strip())
-        FROM = f.readline().strip()
-        TO = f.readline().strip()
-        PASS = f.readline().strip()
+        SERVER = lines[0].strip()
+        IMAPSERVER = lines[1].strip()
+        PORT = int(lines[2].strip())
+        FROM = lines[3].strip()
+        TO = lines[4].strip()
+        PASS = lines[5].strip()
 
     msg = MIMEMultipart()
     msg['From'] = FROM
@@ -123,30 +167,17 @@ def sendEmails(user_info):
 
     server.quit()
 
-def initEmail(): #Creates all content for each email, as well as the user info to send emails out to corresponding user
+def attachContent(user_forms): #Creates all weather content for each email, attaches it to corresponding user
     print('composing emails...')
 
-    #Email details
 
-    #TODO Call writeFormJson w/ api_code in config.properties
-
-    user_forms = getFormData()
     user_info = [] #Will be a list of dicts of each users info, and the content to put into the email
  
-    for form in user_forms: #For each form/submission in the json_file
-        form_data = form['form_data']
+    for user in user_forms: #For each form/submission in the json_file
         
-        city = form_data['city']
-        state = form_data['state']
-        '''
-        try: TO = form_data['emailId']
-        except KeyError:
-            pass
-        try: frequency = form_data['frequency']
-        except KeyError:
-            pass
-        '''
-    
+        city = user['city']
+        state = user['state']
+
         content = ''
 
         (lat, long) = get_lat_long(city, state)
@@ -157,12 +188,19 @@ def initEmail(): #Creates all content for each email, as well as the user info t
         content += ('<br>------<br>')
         content +=('<br><br>End of Message')
 
-        form_data['content'] = content #Append content to form_data
-        user_info.append(form_data) #Append form_data to the list of all users data
+        user['content'] = content #Append content to form_data
+        user_info.append(user) #Append form_data to the list of all users data
 
     return user_info
 
+#Update local JSON file with current form submission form
+#with open('./data/config.properties.txt', 'r') as f:
+#    lines = f.readlines()
+#    api_code = lines[6].strip()
+#writeFormJson(api_code)
 
-users = initEmail()
+#updateCsv()
+#users = getCsvData()
+#users_and_content = attachContent(users)
+
 #sendEmails(users)
-
