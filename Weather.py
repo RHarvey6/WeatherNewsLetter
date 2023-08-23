@@ -8,7 +8,7 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 import datetime
 
-def get_lat_long(city, state):
+def getLatLong(city, state):
     with open('./data/uscities.csv', 'r') as file:
         csvreader = csv.reader(file)
         for row in csvreader:
@@ -16,7 +16,7 @@ def get_lat_long(city, state):
                 if(row[1] == state):
                     return (row[2],row[3])
 
-def extract_weather(url):
+def extractWeather(url):
     print('Extracting Weather')
     cnt = ''
     
@@ -189,9 +189,9 @@ def attachContent(user_forms): #Creates all weather content for each email, atta
 
         content = ''
 
-        (lat, long) = get_lat_long(city, state)
+        (lat, long) = getLatLong(city, state)
         url = 'https://forecast.weather.gov/MapClick.php?textField1=' + lat + '&textField2=' + long
-        cnt = extract_weather(url)
+        cnt = extractWeather(url)
 
         content += cnt
         content += ('<br>------<br>')
