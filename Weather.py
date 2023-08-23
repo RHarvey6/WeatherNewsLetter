@@ -61,9 +61,9 @@ def extract_weather(url):
                 '</div>')
     return(cnt)
 
-def writeFormJson(api_code): #Writes json file to local machine from API
+def getAndWriteJsonForm(api_key): #Writes json file to local machine from API
     #form submission api get
-    response = requests.get("https://formsubmit.co/api/get-submissions/" + api_code)
+    response = requests.get("https://formsubmit.co/api/get-submissions/" + api_key)
 
     json_dict = json.loads(response.text)
 
@@ -106,7 +106,9 @@ def updateCsv(): #Adds any new users from the json not currently in the CSV
         dupe = False #DUPLICATE PROTECTION
         for user in user_info: #For each new user in the jsonForm
             for row in reader_data: #For each user already in the form_data CSV
-                if(row[0]!=user['emailId'] or row[1]!=user['state'] or row[2]!=user['city']): #If not a dupe
+                try: email = user['emailId'] #Incase error
+                except:email = ''
+                if(row[0]!=email or row[1]!=user['state'] or row[2]!=user['city']): #If not a dupe
                     continue
                 else:
                     dupe = True
@@ -119,14 +121,21 @@ def getCsvData(): #Reads local csv form_data, returns all user info
     with open('./data/form_data.csv', 'r', newline='') as outfile:
         reader = csv.reader(outfile)
         for row in reader:
-            current_user = {}
+            try:frequency = row[3] 
+            except:frequency = ''
+            current_user = {} #Create a dict for each user, append to list of dicts user_data
             current_user['emailId'] = row[0]
             current_user['state'] = row[1]
             current_user['city'] = row[2]
-            current_user['frequency'] = row[3]
+            current_user['frequency'] = frequency
             user_data.append(current_user)
-
     return user_data
+
+def getApiKey():
+    with open('./data/config.properties.txt', 'r') as f:
+        lines = f.readlines()
+        api_key = lines[6].strip()
+    return api_key
 
 def sendEmails(user_info):
     now = datetime.datetime.now()
@@ -193,14 +202,3 @@ def attachContent(user_forms): #Creates all weather content for each email, atta
 
     return user_info
 
-#Update local JSON file with current form submission form
-#with open('./data/config.properties.txt', 'r') as f:
-#    lines = f.readlines()
-#    api_code = lines[6].strip()
-#writeFormJson(api_code)
-
-#updateCsv()
-#users = getCsvData()
-#users_and_content = attachContent(users)
-
-#sendEmails(users)
