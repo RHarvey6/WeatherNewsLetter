@@ -105,10 +105,13 @@ def updateCsv(): #Adds any new users from the json not currently in the CSV
         writer = csv.writer(outfile)
         dupe = False #DUPLICATE PROTECTION
         for user in user_info: #For each new user in the jsonForm
-            for row in reader_data: #For each user already in the form_data CSV
+            for row in reader_data: #For each user already in the form_data CSV\
+                csv_email = row[0]
                 try: email = user['emailId'] #Incase error
-                except:email = ''
-                if(row[0]!=email or row[1]!=user['state'] or row[2]!=user['city']): #If not a dupe
+                except:
+                    email = ''
+                    csv_email= ''
+                if(csv_email!=email or row[1]!=user['state'] or row[2]!=user['city']): #If not a dupe
                     continue
                 else:
                     dupe = True
@@ -134,7 +137,7 @@ def getCsvData(): #Reads local csv form_data, returns all user info
 def getApiKey():
     with open('./data/config.properties.txt', 'r') as f:
         lines = f.readlines()
-        api_key = lines[6].strip()
+        api_key = lines[5].strip()
     return api_key
 
 def sendEmails(user_info):
@@ -146,12 +149,7 @@ def sendEmails(user_info):
         IMAPSERVER = lines[1].strip()
         PORT = int(lines[2].strip())
         FROM = lines[3].strip()
-        TO = lines[4].strip()
-        PASS = lines[5].strip()
-
-    msg = MIMEMultipart()
-    msg['From'] = FROM
-
+        PASS = lines[4].strip()
 
     print("Initiating Server")
 
@@ -163,11 +161,15 @@ def sendEmails(user_info):
     server.login(FROM, PASS)
 
     for user in user_info: #Loops through each user, sending an email to each one
+  
+
         city = user['city']
         state = user['state']
         TO = user['emailId']
         content = user['content']
 
+        msg = MIMEMultipart()
+        msg['From'] = FROM
         msg['Subject'] = 'Weather for the Week [Automated Email]' + ' ' + city + ', ' + state + ', ' + str(now.month) + '-' + str(now.day) + '-' + str(now.year)
         msg['TO'] = TO
         msg.attach(MIMEText(content,'html'))
