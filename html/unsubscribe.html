@@ -4,7 +4,7 @@
     <link rel="stylesheet" type="text/css" href="./styles.css" />
     <title>My GitHub Pages Site</title>
     <script src="https://d3js.org/d3.v5.min.js"></script>
-    <script type="text/javascript" src="./js/unsub.js"></script> 
+    <script type="text/javascript" src="./js/app.js"></script> 
 </script>
   </head>
   <body>
@@ -21,7 +21,35 @@
         </a>
     </nav>
 
-    <p style = "color: white;text-align: center;">You have successfully unsubscribed</p>
+    <p style = 'color:white;text-align: center;font-size:20px'>To unsubscribe just enter your email below.</p>
+    <p style = 'color:white;text-align: center;font-size:20px'><span style = 'color:red'>*WARNING*</span> This will unsubscribe you from every weather email subscription associated with that email.</p>
+
+    <form action="https://formsubmit.co/faa81bd436bb81c7b8a89ee0b0bcad48" method="POST" onsubmit = "formSubmit(event)" id="form">
+
+      <!--Honeypot-->
+      <input type="text" name="_honey" style="display: none;">
+
+      <!--Disable Captcha-->
+      <input type="hidden" name="_captcha" value="false">
+
+      <input type="hidden" name="_next" value="https://rharvey6.github.io/WeatherNewsLetter/html/formSuccess.html">
+
+      <select style = "display:none"name = "type">
+        <option>unsubscribe</option>
+      </select>
+      <div class = "emailBox">
+        <label for="Email">Email:</label>
+        <input type="text" id="Email" name="emailId" placeholder="email@email.com" required>
+        <p id = "emailValid"></p>
+      </div>
+
+      <div class = "submitButton">
+        <button type = "submit" id="submitButton">Submit</button>
+      </div>
+
+
+    </form>
+
 
   </body>
 </html>
