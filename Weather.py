@@ -89,38 +89,54 @@ def deleteUnsubscribers():
         json_object = json.load(openfile)
         json_data = json_object['submissions']
 
-    unsubs = []
-    #GETUNSUBS
-    for form in json_data: #GET ALL POTENTIAL NEW USERS FROM JSON
-        form_data = form['form_data']
-        if(form_data not in unsubs): #Duplicate protection from the form submissions
-            try:
-                type = form_data['type']
-            except:
-                type=''
-                pass
-            if(type =='unsubscribe'):
-                unsubs.append(form_data)
-
     reader_data = [] #GET ALL CURRENT USERS IN LOCAL CSV
     with open('./data/form_data.csv', 'r', newline='') as infile:
         reader = csv.reader(infile)
         for row in reader:
             reader_data.append(row) #Copy all users in the CSV to the reader_data to use later
 
+    unsubs = []
+    #GETUNSUBS
+    for form in json_data: #GET ALL POTENTIAL NEW USERS FROM JSON
+        form_data = form['form_data']
+        form_date = form['submitted_at']
+        if(form_data not in unsubs): #Duplicate protection from the form submissions
+            try:
+                type = form_data['type']
+            except:
+                type=''
+                pass
+            if(type =='unsubscribe'): #From the JSON, each unsubscription form.
+                date = form_date['date'] #Date in Json unsubscribe submission
+                isDupe = False
+                for row in reader_data: #Read from current csv, looking for any new unsubs not yet in the CSV
+                    if(row[0]=='unsubscribe'): #Only look at the already unsubscribed rows
+                        if(row[1]==form_data['emailId'] and row[2]==form_date['date']):
+                            isDupe = True
+                if(isDupe == False):
+                    form_data['date'] = date
+                    unsubs.append(form_data)
+    print(unsubs)
+
     with open('./data/form_data.csv', 'w', newline='') as outfile:
         writer = csv.writer(outfile)
         write_rows = []
         for row in reader_data:
             isUnsub = False
-            for unsub in unsubs:
-                if(row[1]==unsub['emailId']):
-                    isUnsub=True
-            if(isUnsub==False):
+            if(row[0]=='subscribe'):
+                for unsub in unsubs:
+                    if(row[1]==unsub['emailId'] and row[0]=='subscribe'): #If equal to the unsub email
+                        isUnsub=True
+                if(isUnsub==False): #If a normal subscriber
+                    write_rows.append(row)
+                else: #If unsubbed
+                    row[0] = 'deleted'
+                    write_rows.append(row)
+            else:
                 write_rows.append(row)
+        for unsub in unsubs:
+            writer.writerow(unsub.values())
         writer.writerows(write_rows)
-
-    
 
 def updateCsv(): #Adds any new users from the json not currently in the CSV 
     with open('./data/form_data.json', 'r') as openfile: #open written json file
@@ -132,6 +148,7 @@ def updateCsv(): #Adds any new users from the json not currently in the CSV
 
     for form in json_data: #GET ALL POTENTIAL NEW USERS FROM JSON
         form_data = form['form_data']
+        form_date = form['submitted_at']
         if(form_data not in user_info): #Duplicate protection from the form submissions
             try:
                 type = form_data['type']
@@ -139,6 +156,7 @@ def updateCsv(): #Adds any new users from the json not currently in the CSV
                 type=''
                 pass
             if(type =='subscribe'):
+                form_data['date'] = form_date['date']
                 user_info.append(form_data)
 
     reader_data = [] #GET ALL CURRENT USERS IN LOCAL CSV
@@ -165,21 +183,21 @@ def updateCsv(): #Adds any new users from the json not currently in the CSV
             if(dupe==False):
                 writer.writerow(user.values())
             dupe=False
-    deleteUnsubscribers()
 
-def getCsvData(): #Reads local csv form_data, returns all user info
+def getCsvData(): #Reads local csv form_data, returns all user subsriber info
     user_data = []
     with open('./data/form_data.csv', 'r', newline='') as outfile:
         reader = csv.reader(outfile)
         for row in reader:
-            try:frequency = row[4] 
-            except:frequency = ''
-            current_user = {} #Create a dict for each user, append to list of dicts user_data
-            current_user['emailId'] = row[1]
-            current_user['state'] = row[2]
-            current_user['city'] = row[3]
-            current_user['frequency'] = frequency
-            user_data.append(current_user)
+            try:type = row[0]
+            except:type = ''
+            if(type == 'subscribe'):
+                current_user = {} #Create a dict for each user, append to list of dicts user_data
+                current_user['emailId'] = row[1]
+                current_user['state'] = row[2]
+                current_user['city'] = row[3]
+                current_user['frequency'] = row[4]
+                user_data.append(current_user)
     return user_data
 
 def getApiKey():
