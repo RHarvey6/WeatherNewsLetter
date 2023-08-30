@@ -20,9 +20,14 @@ def extractWeather(url):
     print('Extracting Weather')
     cnt = ''
     
+    '''
     cnt+= ('<head> <style>' +
            'p {color: blue;}'
-           '</style></head>')
+           '</style></head>')'''
+    
+    cnt+=('<div style = "background-color: white;display:flexbox;width: 50%;margin-left: 25%;">'
+    + '<div style = "background-color: #2a86fd;height:100%;width: 90%;display:flexbox">'
+    + '<div style = "text-align: center;background-color: white;height:100%;width: 90%;margin:5%;display:flexbox">')
     
     cnt +=('<b>Your weather for the week, at a glance.</b>\n'  + '<br>'
         + 'Retrieved from: '  + '<a href="' + url + '">' + 'forecast.weather.gov' + '</a>'
@@ -37,6 +42,12 @@ def extractWeather(url):
             period_name = tag.find('p',attrs={'class':'period-name'}).get_text(separator=" ")
             short_desc = tag.find('p',attrs={'class':'short-desc'}).get_text(separator=" ")
             high_low_temp = tag.find('p',attrs={'class':re.compile('temp')}).get_text(separator=" ")
+            
+
+            if(re.match('Low', high_low_temp)): #Blue for low temps, red for high temps
+                high_low_temp = '<span style = "color: blue">' + high_low_temp[:4] + '</span>' + high_low_temp[4:]
+            else:
+                high_low_temp = '<span style = "color: red">' + high_low_temp[:5] + '</span>' + high_low_temp[5:]
 
             img = tag.find('img')
             imgsrc = img.get('src')
@@ -46,7 +57,7 @@ def extractWeather(url):
                     '<br>' + '<b>' + period_name+ '</b>' + "\n" + '<br>' +
                     '<img src = "https://forecast.weather.gov/' + imgsrc +  '">' + '<br>' +
                     short_desc + "\n"+ '<br>' +
-                    high_low_temp + "\n" + '<br>' +
+                    high_low_temp + '<br>' +
                     '</p>')
         else: #HAZARD
             hazard_name = tag.find('p',attrs={'class':'short-desc'}).get_text(separator=" ")
@@ -132,7 +143,7 @@ def deleteUnsubscribers():
                 else: #If unsubbed
                     row[0] = 'deleted'
                     write_rows.append(row)
-            else:
+            else: #If a normal row, not even a subscriber just leave it alone
                 write_rows.append(row)
         for unsub in unsubs:
             writer.writerow(unsub.values())
@@ -206,9 +217,6 @@ def getApiKey():
         api_key = lines[5].strip()
     return api_key
 
-def createUnsubscribeButton(email, city, state):
-    0
-
 def sendEmails(user_info):
     now = datetime.datetime.now()
     with open('./data/config.properties.txt', 'r') as f:
@@ -268,6 +276,10 @@ def attachContent(user_forms): #Creates all weather content for each email, atta
         #content+= createUnsubscribeButton(email, city, state)
         content += ('<br>------<br>')
         content +=('<br><br>End of Message')
+
+        content +=('</div></div></div>')
+
+        content += '<a href = https://rharvey6.github.io/WeatherNewsLetter/html/unsubscribe.html>Unsubscribe</a>'
 
         user['content'] = content #Append content to form_data
         user_info.append(user) #Append form_data to the list of all users data
