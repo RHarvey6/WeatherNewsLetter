@@ -28,7 +28,7 @@ def extractWeather(url):
     
     cnt+=('<div style = "background-color: white;display:flexbox;width: 50%;margin-left: 25%;">'
     + '<div style = "background-color: #2a86fd;height:100%;width: 90%;display:flexbox">'
-    + '<div style = "text-align: center;background-color: white;height:100%;width: 90%;margin:5%;display:flexbox;font-size:20px">')
+    + '<div style = "text-align: center;background-color: white;height:100%;width: 90%;margin:5%;display:flexbox;font-size:15px">')
     
     cnt +=('<b>Your weather for the week, at a glance.</b>\n'  + '<br>'
         + 'Retrieved from: '  + '<a href="' + url + '">' + 'forecast.weather.gov' + '</a>'
