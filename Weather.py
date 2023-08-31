@@ -8,6 +8,7 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 import datetime
 
+
 def getLatLong(city, state):
     with open('./data/uscities.csv', 'r') as file:
         csvreader = csv.reader(file)
@@ -27,7 +28,7 @@ def extractWeather(url):
     
     cnt+=('<div style = "background-color: white;display:flexbox;width: 50%;margin-left: 25%;">'
     + '<div style = "background-color: #2a86fd;height:100%;width: 90%;display:flexbox">'
-    + '<div style = "text-align: center;background-color: white;height:100%;width: 90%;margin:5%;display:flexbox">')
+    + '<div style = "text-align: center;background-color: white;height:100%;width: 90%;margin:5%;display:flexbox;font-size:20px">')
     
     cnt +=('<b>Your weather for the week, at a glance.</b>\n'  + '<br>'
         + 'Retrieved from: '  + '<a href="' + url + '">' + 'forecast.weather.gov' + '</a>'
@@ -198,17 +199,23 @@ def updateCsv(): #Adds any new users from the json not currently in the CSV
 def getCsvData(): #Reads local csv form_data, returns all user subsriber info
     user_data = []
     with open('./data/form_data.csv', 'r', newline='') as outfile:
+        dt = datetime.datetime.now()
+        day = dt.weekday() #Current day of the week
+
         reader = csv.reader(outfile)
         for row in reader:
             try:type = row[0]
             except:type = ''
+            try:frequency = row[4]
+            except:frequency = ''
             if(type == 'subscribe'):
-                current_user = {} #Create a dict for each user, append to list of dicts user_data
-                current_user['emailId'] = row[1]
-                current_user['state'] = row[2]
-                current_user['city'] = row[3]
-                current_user['frequency'] = row[4]
-                user_data.append(current_user)
+                if(frequency=='Daily' or (frequency=='Weekly' and day==6)): #If daily email, or if weekly, then if day is sunday
+                    current_user = {} #Create a dict for each user, append to list of dicts user_data
+                    current_user['emailId'] = row[1]
+                    current_user['state'] = row[2]
+                    current_user['city'] = row[3]
+                    current_user['frequency'] = row[4]
+                    user_data.append(current_user)
     return user_data
 
 def getApiKey():
