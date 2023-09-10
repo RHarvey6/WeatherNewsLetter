@@ -9,6 +9,7 @@ from email.mime.text import MIMEText
 import datetime
 
 
+
 def getLatLong(city, state):
     with open('./data/uscities.csv', 'r') as file:
         csvreader = csv.reader(file)
@@ -26,7 +27,7 @@ def extractWeather(url):
            'p {color: blue;}'
            '</style></head>')'''
     
-    cnt+=('<div style = "background-color: white;display:flexbox;width: 50%;margin-left: 25%;">'
+    cnt+=('<div style = "background-color: white;display:flexbox;width: 75%;margin-left: 12.5%;">'
     + '<div style = "background-color: #2a86fd;height:100%;width: 90%;display:flexbox">'
     + '<div style = "text-align: center;background-color: white;height:100%;width: 90%;margin:5%;display:flexbox;font-size:15px">')
     
@@ -182,7 +183,7 @@ def updateCsv(): #Adds any new users from the json not currently in the CSV
         dupe = False #DUPLICATE PROTECTION
         for user in user_info: #For each new user in the jsonForm
             for row in reader_data: #For each user already in the form_data CSV\
-                if(row[0] == 'subscribe'):
+                if(row[0] == 'subscribe'): #Checking each subscription in the CSV already.
                     csv_email = row[1]
                     try: 
                         email = user['emailId'] #Incase error
@@ -191,6 +192,9 @@ def updateCsv(): #Adds any new users from the json not currently in the CSV
                         csv_email= ''
                         pass
                     if(csv_email==email and row[2]==user['state'] and row[3]==user['city']): #If a dupe
+                        dupe = True
+                if(row[0]=='deleted'): #Checking each deleted to make sure the submission hasn't already been deleted.
+                    if(row[5] == user['date']):
                         dupe = True
             if(dupe==False):
                 writer.writerow(user.values())
