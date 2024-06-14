@@ -7,13 +7,47 @@ function formSubmit(event) {
   }
 }
 
+function unsubEmail(event) { //Gets Query string and submits unsub form
+  event.preventDefault();
+  const params = new Proxy(new URLSearchParams(window.location.search), {
+    get: (searchParams, prop) => searchParams.get(prop),
+  });
+  formSubmitV(params)
+
+}
+
+async function formSubmitV(query) {
+  console.log("formSubmitV Called")
+      const response = await fetch('https://formsubmit.co/ajax/faa81bd436bb81c7b8a89ee0b0bcad48', {
+          method: 'POST',
+          headers: {
+              'Content-Type': 'application/json',
+              'Accept': 'application/json'
+          },
+          body: JSON.stringify({
+              type: "unsubscribe",
+              emailId: query.e,
+              stateId: query.s,
+              cityId: query.c
+          })
+      })
+      
+    .then(response => response.json())
+    .then(data => console.log(data))
+    .catch(error => console.log(error));
+
+    window.location.replace("https://rharvey6.github.io/WeatherNewsLetter/html/formSuccess.html")
+}
+
+
+
 function runEmailCheck () {
   emailText = d3.select("#Email").property("value")
   emailValid = d3.select("#emailValid")
   if(emailText == ""){
     emailValid.html("")
   }
-  else if(ValidateEmail()){
+  else if(isValidEmail(emailText)){
     emailValid.attr("style", "color: darkgreen").html("Valid email")
   } else{
     emailValid.attr("style", "color: darkred").html("Invalid email")
@@ -21,12 +55,12 @@ function runEmailCheck () {
   
 }
 
-function ValidateEmail() { //Returns true or false whether a valid email
-  emailText = d3.select("#Email").property("value")
+function isValidEmail(email) {
+  emailText = email
   var mailformat = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
   if(mailformat.test(emailText)){return true;}
     else {return false;}
-  }
+}
 
 d3.csv("../data/uscities.csv").then(function (data) {
   var cityStates = data;

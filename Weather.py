@@ -2,6 +2,7 @@ import requests
 import re
 import json
 import csv
+from cryptography.fernet import Fernet
 from bs4 import BeautifulSoup
 import smtplib
 from email.mime.multipart import MIMEMultipart
@@ -9,9 +10,8 @@ from email.mime.text import MIMEText
 import datetime
 
 
-
 def getLatLong(city, state):
-    with open('./data/uscities.csv', 'r') as file:
+    with open('C:/Code/Weather Email/data/uscities.csv', 'r') as file:
         csvreader = csv.reader(file)
         for row in csvreader:
             if(row[0] == city):
@@ -92,18 +92,18 @@ def getAndWriteJsonForm(api_key): #Writes json file to local machine from API
     json_dict['submissions'] = form_list
 
     json_str = json.dumps(json_dict, indent=4) #Convert to string, then write
-    with open("./data/form_data.json", "w") as outfile:
+    with open("C:/Code/Weather Email/data/form_data.json", "w") as outfile:
         outfile.write(json_str)
 
 def deleteUnsubscribers():
 
-    with open('./data/form_data.json', 'r') as openfile: #open written json file
+    with open('C:/Code/Weather Email/data/form_data.json', 'r') as openfile: #open written json file
         # Reading from json file
         json_object = json.load(openfile)
         json_data = json_object['submissions']
 
     reader_data = [] #GET ALL CURRENT USERS IN LOCAL CSV
-    with open('./data/form_data.csv', 'r', newline='') as infile:
+    with open('C:/Code/Weather Email/data/form_data.csv', 'r', newline='') as infile:
         reader = csv.reader(infile)
         for row in reader:
             reader_data.append(row) #Copy all users in the CSV to the reader_data to use later
@@ -114,31 +114,48 @@ def deleteUnsubscribers():
         form_data = form['form_data']
         form_date = form['submitted_at']
         if(form_data not in unsubs): #Duplicate protection from the form submissions
-            try:
+            try: #protection against false forms
                 type = form_data['type']
+                date = form_date['date'] #Date in Json unsubscribe submission
+                email = decryptMessage(eval(form_data['emailId']))
             except:
                 type=''
+                date = ''
+                email = ''
+                print("Delete Unsubs Error in variable")
                 pass
             if(type =='unsubscribe'): #From the JSON, each unsubscription form.
-                date = form_date['date'] #Date in Json unsubscribe submission
                 isDupe = False
                 for row in reader_data: #Read from current csv, looking for any new unsubs not yet in the CSV
                     if(row[0]=='unsubscribe'): #Only look at the already unsubscribed rows
-                        if(row[1]==form_data['emailId'] and row[2]==form_date['date']):
+                        if(row[1]==email and row[4]==date):
                             isDupe = True
                 if(isDupe == False):
-                    form_data['date'] = date
-                    unsubs.append(form_data)
-    print(unsubs)
+                    try:
+                        form_data['date'] = date
+                        unsubs.append(form_data)
+                    except:
+                        print("Delete Unsubs Error in append")
+                        pass
 
-    with open('./data/form_data.csv', 'w', newline='') as outfile:
+    with open('C:/Code/Weather Email/data/form_data.csv', 'w', newline='') as outfile:
         writer = csv.writer(outfile)
         write_rows = []
         for row in reader_data:
             isUnsub = False
             if(row[0]=='subscribe'):
                 for unsub in unsubs:
-                    if(row[1]==unsub['emailId'] and row[0]=='subscribe'): #If equal to the unsub email
+                    try:
+                        email = decryptMessage(eval(unsub['emailId']))
+                        state = decryptMessage(eval(unsub['stateId']))
+                        city = decryptMessage(eval(unsub['cityId']))
+                    except:
+                        email = ''
+                        state = ''
+                        city = ''
+                        print("Delete Unsubs Error in decrypt")
+                    pass
+                    if(row[0]=='subscribe' and row[1].lower()==email.lower() and row[2]==state and row[3] == city): #If equal to the unsub email
                         isUnsub=True
                 if(isUnsub==False): #If a normal subscriber
                     write_rows.append(row)
@@ -148,11 +165,19 @@ def deleteUnsubscribers():
             else: #If a normal row, not even a subscriber just leave it alone
                 write_rows.append(row)
         for unsub in unsubs:
-            writer.writerow(unsub.values())
+            try:
+                print(decryptMessage(eval(unsub['emailId'])))
+                unsub['emailId'] = decryptMessage(eval(unsub['emailId']))
+                unsub['stateId'] = decryptMessage(eval(unsub['stateId']))
+                unsub['cityId'] = decryptMessage(eval(unsub['cityId']))
+                writer.writerow(unsub.values())
+            except:
+                print("Delete Unsubs Error in write")
+                pass
         writer.writerows(write_rows)
 
 def updateCsv(): #Adds any new users from the json not currently in the CSV 
-    with open('./data/form_data.json', 'r') as openfile: #open written json file
+    with open('C:/Code/Weather Email/data/form_data.json', 'r') as openfile: #open written json file
         # Reading from json file
         json_object = json.load(openfile)
     json_data = json_object['submissions']
@@ -173,36 +198,61 @@ def updateCsv(): #Adds any new users from the json not currently in the CSV
                 user_info.append(form_data)
 
     reader_data = [] #GET ALL CURRENT USERS IN LOCAL CSV
-    with open('./data/form_data.csv', 'r', newline='') as outfile:
+    with open('C:/Code/Weather Email/data/form_data.csv', 'r', newline='') as outfile:
         reader = csv.reader(outfile)
         for row in reader:
             reader_data.append(row) #Copy all users in the CSV to the reader_data to use later
 
-    with open('./data/form_data.csv', 'a', newline='') as outfile: #APPEND ALL NEW USERS TO CSV
+    with open('C:/Code/Weather Email/data/form_data.csv', 'a', newline='') as outfile: #APPEND ALL NEW USERS TO CSV
         writer = csv.writer(outfile)
         dupe = False #DUPLICATE PROTECTION
         for user in user_info: #For each new user in the jsonForm
             for row in reader_data: #For each user already in the form_data CSV\
-                if(row[0] == 'subscribe'): #Checking each subscription in the CSV already.
+                csv_type = row[0]
+                if(csv_type == 'subscribe'): #Checking each subscription in the CSV already.
                     csv_email = row[1]
+                    csv_state = row[2]
+                    csv_city = row[3]
                     try: 
-                        email = user['emailId'] #Incase error
+                        email = user['emailId'] 
+                        state = user['state'] 
+                        city = user['city'] 
+                        date = user['date']
                     except:
                         email = ''
-                        csv_email= ''
+                        state = ''
+                        city = ''
+                        date = ''
+                        print('UpdateCSV Error in subscribe')
                         pass
-                    if(csv_email==email and row[2]==user['state'] and row[3]==user['city']): #If a dupe
+                    if(csv_email==email and csv_state==state and csv_city==city): #If a dupe
                         dupe = True
-                if(row[0]=='deleted'): #Checking each deleted to make sure the submission hasn't already been deleted.
-                    if(row[5] == user['date']):
+                if(csv_type=='deleted'): #Checking each deleted to make sure the submission hasn't already been deleted.
+                    csv_date = row[5]
+                    try:
+                        date = user['date']
+                    except:
+                        date = ''
+                        print('UpdateCSV Error in deleted')
+                        pass
+                    if(csv_date == date):
                         dupe = True
             if(dupe==False):
-                writer.writerow(user.values())
+                try: 
+                    user['emailId'] = email
+                    user['state'] = state
+                    user['city'] = city
+                    user['date'] = date
+                    writer.writerow(user.values())
+                except:
+                    print('UpdateCSV Error in write')
+                    pass
+                
             dupe=False
 
 def getCsvData(): #Reads local csv form_data, returns all user subsriber info
     user_data = []
-    with open('./data/form_data.csv', 'r', newline='') as outfile:
+    with open('C:/Code/Weather Email/data/form_data.csv', 'r', newline='') as outfile:
         dt = datetime.datetime.now()
         day = dt.weekday() #Current day of the week
 
@@ -223,14 +273,28 @@ def getCsvData(): #Reads local csv form_data, returns all user subsriber info
     return user_data
 
 def getApiKey():
-    with open('./data/config.properties.txt', 'r') as f:
+    with open('C:/Code/Weather Email/data/config.properties.txt', 'r') as f:
         lines = f.readlines()
         api_key = lines[5].strip()
     return api_key
 
+def getEncryptKey():
+    with open('C:/Code/Weather Email/data/config.properties.txt', 'r') as f:
+        lines = f.readlines()
+        key = lines[6].strip()
+    return key
+
+def encryptMessage(message):
+    fernet = Fernet(getEncryptKey())
+    return str(fernet.encrypt(message.encode()))
+
+def decryptMessage(message):
+    fernet = Fernet(getEncryptKey())
+    return str(fernet.decrypt(message).decode())
+
 def sendEmails(user_info):
     now = datetime.datetime.now()
-    with open('./data/config.properties.txt', 'r') as f:
+    with open('C:/Code/Weather Email/data/config.properties.txt', 'r') as f:
         lines = f.readlines()
 
         SERVER = lines[0].strip()
@@ -290,7 +354,10 @@ def attachContent(user_forms): #Creates all weather content for each email, atta
 
         content +=('</div></div></div>')
 
-        content += '<a href = https://rharvey6.github.io/WeatherNewsLetter/html/unsubscribe.html>Unsubscribe</a>'
+        content += '<a href = https://rharvey6.github.io/WeatherNewsLetter/html/unsubscribe.html?e=' + encryptMessage(email) \
+        +  '&s=' + encryptMessage(state) \
+        +'&c=' + encryptMessage(city) \
+        + '> Unsubscribe</a>' #query string construction
 
         user['content'] = content #Append content to form_data
         user_info.append(user) #Append form_data to the list of all users data
